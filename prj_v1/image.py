@@ -12,8 +12,8 @@ from scipy.ndimage import uniform_filter, gaussian_filter
 class Image:
     def __init__(self, data: ndarray=None):
         self.data = data
-        self.path = None
-        self.name = None
+        self.path = ""
+        self.name = ""
 
     def imread(self, path: str) -> Image:
         self.data = Image(skimage.io.imread(path))
@@ -29,6 +29,29 @@ class Image:
 
 ## Image Transformer / Filters
 class ImageProcessor(Image):
+    
+    def amp(self) -> Image:
+        return ImageProcessor(np.abs(self.data))
+    
+    def ang(self) -> Image:
+        return ImageProcessor(np.angle(self.data))
+    
+    def abs(self) -> Image:
+        self.data = np.abs(self.data)
+        return self
+    
+    def log1p(self) -> Image:
+        self.data = np.log1p(self.data)
+        return self
+    
+    def log(self) -> Image:
+        self.data = np.log10(self.data)
+        return self
+    
+    def real(self) -> Image:
+        self.dta = np.real(self.data)
+        return self
+    
     def gray(self) -> Image:
         assert self.data is not None
         if self.data.ndim > 2:
