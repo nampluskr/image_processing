@@ -37,20 +37,16 @@ class ImageProcessor(Image):
         return ImageProcessor(np.angle(self.data))
     
     def abs(self) -> Image:
-        self.data = np.abs(self.data)
-        return self
+        return ImageProcessor(np.abs(self.data))
     
     def log1p(self) -> Image:
-        self.data = np.log1p(self.data)
-        return self
+        return ImageProcessor(np.log1p(self.data))
     
     def log(self) -> Image:
-        self.data = np.log10(self.data)
-        return self
+        return ImageProcessor(np.log10(self.data))
     
     def real(self) -> Image:
-        self.dta = np.real(self.data)
-        return self
+        return ImageProcessor(np.real(self.data))
     
     def gray(self) -> Image:
         assert self.data is not None

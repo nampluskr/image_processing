@@ -11,14 +11,6 @@ from image import Image, ImageProcessor
 class FFT2D(ImageProcessor):
     def __init__(self, img: Image):
         self.data = fft2(img.data)
-    
-    # ## amp()
-    # def amplitude(self) -> ImageProcessor:
-    #     return ImageProcessor(self.data).abs()
-    
-    # ## ang()
-    # def phase(self) -> ImageProcessor:
-    #     return ImageProcessor(np.angle(self.data))
 
 
 class FFT2DShift(ImageProcessor):
