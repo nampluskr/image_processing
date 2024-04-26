@@ -17,6 +17,7 @@ class FFT2DShift(Image):
         self.data = fftshift(fft2(img.data))
         self.name = img.name
         self.title("(fftshift)")
+        self.shifted = True
 
 
 class InvFFT2D(Image):
@@ -57,10 +58,11 @@ class InvDCT2D(Image):
         self.title("(idct)")
 
 
+
 if __name__ == "__main__":
 
-    from viewer import Viewer2D
-    viewer = Viewer2D()
+    from viewer import MultiViewer
+    viewer = MultiViewer()
     img = Image(skimage.data.astronaut()).title("RAW").info()
     img._gray()
 
@@ -73,15 +75,15 @@ if __name__ == "__main__":
 
     if 0:
         img_fft = FFT2DShift(img)
-        img_amp = img_fft.amplitude()
-        img_ang = img_fft.phase()
+        img_amp = img_fft.abs()
+        img_ang = img_fft.angle()
         img_inv = InvFFT2DShift(img_amp, img_ang)._abs()
         viewer.show(img_inv)
         
     if 1:
         img_fft = FFT2DShift(img)
-        img_amp = img_fft.amplitude()
-        img_ang = img_fft.phase()
+        img_amp = img_fft.abs()
+        img_ang = img_fft.angle()
         img_inv = InvFFT2DShift(img_amp, img_ang)._abs()
 
         viewer.show(img_amp.log1p())

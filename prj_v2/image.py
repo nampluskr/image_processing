@@ -43,7 +43,7 @@ class DataGenerator(Data):
         img = Image(np.abs(self.data), name=self.name)
         img.title("(abs)")
         return img
-    
+
     def real(self):
         img = Image(np.real(self.data), name=self.name)
         img.title("(real)")
@@ -59,24 +59,15 @@ class DataGenerator(Data):
         img.title("(log10)")
         return img
 
-    def amplitude(self):
-        img = Image(np.abs(self.data), name=self.name)
-        img.title("(abs)")
-        return img
-
-    def phase(self):
+    def angle(self):
         img = Image(np.angle(self.data), name=self.name)
+        img.dtype = "ang"
         img.title("(ang)")
         return img
 
 
 ## Inline Data Modifiers
 class DataModifier(Data):
-    def _abs(self):
-        self.data = np.abs(self.data)
-        self.title("(abs)")
-        return self
-
     def _gray(self):
         if self.data.ndim > 2:
             if self.data.shape[-1] > 3:
@@ -85,8 +76,8 @@ class DataModifier(Data):
         self.title("(gray)")
         return self
 
-    def _resize(self, width, height):
-        self.data = skimage.transform.resize(self.data, (width, height))
+    def _resize(self, height, width):
+        self.data = skimage.transform.resize(self.data, (height, width))
         self.title("(resized)")
         return self
 
@@ -106,19 +97,28 @@ class DataModifier(Data):
         self.title("(uniform)")
         return self
 
-##
+
+## Main Objects
 class Image(DataGenerator, DataModifier):
-    pass
+    def __init__(self, data: ndarray, name: str=""):
+        super().__init__(data, name)
+        self.dtype = "img"   # ("img", "amp", "ang")
+        self.shifted = False
+
+    def set_dtype(self, dtype: str):
+        self.dtype == dtype
+        return self
+
 
 
 if __name__ == "__main__":
 
-    from viewer import Viewer2D
-    img1 = Image(skimage.data.astronaut()).title("astronaut").info()
-    img2 = img1._gray()._abs().copy().info()
-    img1.info()
+    from viewer import MultiViewer
+    img1 = Image(skimage.data.astronaut()).title("astronaut").info(1)
+    img2 = img1._gray().copy().info(1)
+    img1.info(1)
 
-    viewer = Viewer2D()
+    viewer = MultiViewer()
     viewer.show(img1)
     viewer.show(img2)
 
