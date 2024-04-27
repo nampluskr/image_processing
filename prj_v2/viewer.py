@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from image import Image
+from axesparams import AxesParams
 
 ## Abstract Class
 class Viewer(ABC):
@@ -15,11 +16,11 @@ class Viewer(ABC):
         self.size = (6, 4)
         self.is_axis_off = False
 
-    def cmap(self, cm: str) -> Viewer:
+    def cmap(self, cm: str):
         self.cm = cm
         return self
 
-    def figsize(self, width, height) -> Viewer:
+    def figsize(self, width, height):
         self.size = width, height
         return self
 
@@ -62,12 +63,15 @@ class MultiViewer(Viewer):
             fig, axes = plt.subplots(1, len(img), figsize=self.size)
 
         for i in range(len(img)):
-            # axes[i].imshow(img[i].data, cmap=self.cm)
-            axes[i].imshow(img[i].data, cmap=self.cm, extent=None)
+            axes[i].imshow(img[i].data, cmap=self.cm)
             axes[i].set_title(img[i].name)
-            # if img[i].dtype == "img":
-            #     axes[i].set_xticks([])
-            #     axes[i].set_yticks([])
+
+            params = AxesParams(img[i])
+            # axes[i].imshow(img[i].data, cmap=self.cm, extent=params.extent())
+            axes[i].set_xticks(params.xticks())
+            axes[i].set_yticks(params.yticks())
+            axes[i].set_xticklabels(params.xticklabels())
+            axes[i].set_yticklabels(params.yticklabels())
 
             if self.is_axis_off:
                 axes[i].set_axis_off()
@@ -76,35 +80,35 @@ class MultiViewer(Viewer):
         plt.show()
 
 
-class PlotOptions:
-    def __init__(self, img: Image):
-        self.M, self.N = img.shape[:2]
-        self.dtype = img.dtype
-        self.shifted = img.shifted
-        
-    def extent(self):
-        pass
-
-
-
 if __name__ == "__main__":
 
     import skimage
     from fft import FFT2DShift, InvFFT2DShift
 
-    img = Image(skimage.data.astronaut()).title("RAW").info()
-    img = img._gray()._resize(500, 300).info()
+    img = Image(skimage.data.astronaut()).title("RAW")
+    img = img._gray()._resize(500, 300)
     viewer = MultiViewer()
 
-    if 1:
-        fft = FFT2DShift(img)
-        amp = fft.abs()
-        ang = fft.angle()
-        ifft = InvFFT2DShift(amp, ang).abs()
+    fft = FFT2DShift(img)
+    amp = fft.abs()
+    ang = fft.angle()
+    ifft = InvFFT2DShift(amp, ang).abs()
 
+    if 1:
+        amp_ = amp.copy().log1p()
+        amp_.dtype = "amp"
+        amp_.is_shift = True
+        print(amp_.dtype, amp_.is_shifted)
+        viewer.show(img, amp_)
+
+    if 0:
         viewer.show(img)
         viewer.show(img, amp.log1p())
         viewer.show(img, amp.log1p(), ang)
         viewer.show(img, amp.log1p(), ang, ifft)
 
+    if 0:
+        data = amp.log1p()
+        print(data.dtype, data.is_shifted)
+        viewer.show(data)
 

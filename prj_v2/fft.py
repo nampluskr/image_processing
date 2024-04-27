@@ -10,6 +10,8 @@ class FFT2D(Image):
         self.data = fft2(img.data)
         self.name = img.name
         self.title("(fft)")
+        self.dtype = "img"
+        self.is_shifted = False
 
 
 class FFT2DShift(Image):
@@ -17,7 +19,8 @@ class FFT2DShift(Image):
         self.data = fftshift(fft2(img.data))
         self.name = img.name
         self.title("(fftshift)")
-        self.shifted = True
+        self.dtype = "img"
+        self.is_shifted = True
 
 
 class InvFFT2D(Image):
@@ -30,6 +33,8 @@ class InvFFT2D(Image):
             self.name = amp.name[5:]
         self.data = ifft2(self.data)
         self.title("(ifft)")
+        self.dtype = "img"
+        self.is_shifted = False
 
 
 class InvFFT2DShift(Image):
@@ -42,6 +47,8 @@ class InvFFT2DShift(Image):
             self.name = amp.name[5:]
         self.data = ifft2(ifftshift(self.data))
         self.title("(ifftshift)")
+        self.dtype = "img"
+        self.is_shifted = False
 
 
 class DCT2D(Image):
@@ -49,6 +56,8 @@ class DCT2D(Image):
         self.data = dct(dct(img.data.T, type=2, norm='ortho').T, type=2, norm='ortho')
         self.name = img.name
         self.title("(dct)")
+        self.dtype = "img"
+        self.is_shifted = False
 
 
 class InvDCT2D(Image):
@@ -56,6 +65,8 @@ class InvDCT2D(Image):
         self.data = idct(idct(img.data.T, type=2, norm='ortho').T, type=2, norm='ortho')
         self.name = img.name
         self.title("(idct)")
+        self.dtype = "img"
+        self.is_shifted = False
 
 
 

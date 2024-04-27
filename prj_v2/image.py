@@ -35,12 +35,13 @@ class Data:
 ## New Data Object Generators
 class DataGenerator(Data):
     def copy(self):
-        img = Image(self.data, name=self.name)
+        img = Image(self.data, name=self.name, dtype=self.dtype, is_shifted=self.is_shifted)
         img.title("(copy)")
         return img
 
     def abs(self):
-        img = Image(np.abs(self.data), name=self.name)
+        # img = Image(np.abs(self.data), name=self.name)
+        img = Image(np.abs(self.data), name=self.name, dtype=self.dtype, is_shifted=self.is_shifted)
         img.title("(abs)")
         return img
 
@@ -50,7 +51,8 @@ class DataGenerator(Data):
         return img
 
     def log1p(self):
-        img = Image(np.log1p(self.data), name=self.name)
+        # img = Image(np.log1p(self.data), name=self.name)
+        img = Image(np.log1p(self.data), name=self.name, dtype=self.dtype, is_shifted=self.is_shifted)
         img.title("(log1p)")
         return img
 
@@ -87,12 +89,12 @@ class DataModifier(Data):
         self.title("(rescaled)")
         return self
 
-    def _gaussian(self, sigma=1) -> Image:
+    def _gaussian(self, sigma=1):
         self.data = gaussian_filter(self.data, sigma=sigma)
         self.title("(gaussian)")
         return self
 
-    def _uniform(self, size=1) -> Image:
+    def _uniform(self, size=1):
         self.data = uniform_filter(self.data, size=size, mode="nearest")
         self.title("(uniform)")
         return self
@@ -100,13 +102,17 @@ class DataModifier(Data):
 
 ## Main Objects
 class Image(DataGenerator, DataModifier):
-    def __init__(self, data: ndarray, name: str=""):
+    def __init__(self, data: ndarray, name: str="", dtype: str="img", is_shifted: bool=False):
         super().__init__(data, name)
-        self.dtype = "img"   # ("img", "amp", "ang")
-        self.shifted = False
+        self.dtype = dtype
+        self.is_shifted = is_shifted
 
     def set_dtype(self, dtype: str):
         self.dtype == dtype
+        return self
+    
+    def shifted(self):
+        self.dtype = True
         return self
 
 
