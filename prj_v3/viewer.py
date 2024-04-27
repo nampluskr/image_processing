@@ -5,18 +5,19 @@ import matplotlib.pyplot as plt
 ## Main Image Viewer Class
 class Viewer:
     def __init__(self):
-        self.reset()
         self.xticks = Xticks()
         self.yticks = Yticks()
         self.xticklabels = XtickLabels()
         self.yticklabels = YticksLabels()
+        self.reset()
 
     def reset(self):
-        self.figsize = 6, 4
         self.cmap = "gray"
+        self.unit = 3
+        return self
 
-    def set_figsize(self, width, height):
-        self.figsize = width, height
+    def set_unit(self, unit):
+        self.unit = unit
         return self
 
     def set_cmap(self, cmap):
@@ -25,13 +26,13 @@ class Viewer:
 
     def show(self, *img: tuple):
         ncols = len(img)
-        self.figsize = (3*ncols, 3)
+        figsize = (self.unit*ncols, self.unit)
 
         if ncols == 1:
-            fig, ax = plt.subplots(figsize=self.figsize)
+            fig, ax = plt.subplots(figsize=figsize)
             axes = [ax]
         else:
-            fig, axes = plt.subplots(1, len(img), figsize=self.figsize)
+            fig, axes = plt.subplots(1, len(img), figsize=figsize)
 
         for i in range(len(img)):
             axes[i].imshow(img[i].data, cmap=self.cmap)

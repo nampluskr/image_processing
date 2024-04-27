@@ -9,12 +9,15 @@ class FFT2D(Image):
     def __init__(self, img: Image):
         self.data = fft2d.fft2(img.data)
         self.reset(img)
+        self.axis_off = False
 
 
 class FFT2DShift(Image):
     def __init__(self, img: Image):
         self.data = fft2d.fftshift(fft2d.fft2(img.data))
         self.reset(img)
+        self.shifted = True
+        self.axis_off = False
 
 
 class InvFFT2D(Image):
@@ -23,6 +26,9 @@ class InvFFT2D(Image):
         self.data = fft2d.ifft2(data)
         self.reset(amp)
         self.title = "Inverse FFT"
+        self.dtype = "img"
+        self.shifted = False
+        self.axis_off = False
 
 
 class InvFFT2DShift(Image):
@@ -31,6 +37,9 @@ class InvFFT2DShift(Image):
         self.data = fft2d.ifft2(fft2d.ifftshift(data))
         self.reset(amp)
         self.title = "Inverse FFT"
+        self.dtype = "img"
+        self.shifted = False
+        self.axis_off = False
 
 
 ## DCT Functions for Images
@@ -38,6 +47,7 @@ class DCT2D(Image):
     def __init__(self, img: Image):
         self.data = fft2d.dct(fft2d.dct(img.data.T, type=2, norm='ortho').T, type=2, norm='ortho')
         self.reset(img)
+        self.axis_off = False
 
 
 class InvDCT2D(Image):
@@ -45,6 +55,7 @@ class InvDCT2D(Image):
         self.data = fft2d.idct(fft2d.idct(img.data.T, type=2, norm='ortho').T, type=2, norm='ortho')
         self.reset(img)
         self.title = "Inverse DCT"
+        self.axis_off = False
 
 
 ## Math Functions for FFT of Images
