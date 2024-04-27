@@ -26,18 +26,17 @@ class Viewer:
 
     def show(self, *img: tuple):
         ncols = len(img)
-        figsize = (self.unit*ncols, self.unit)
+        figsize = (self.unit*len(img), self.unit)
 
         if ncols == 1:
             fig, ax = plt.subplots(figsize=figsize)
             axes = [ax]
         else:
-            fig, axes = plt.subplots(1, len(img), figsize=figsize)
+            fig, axes = plt.subplots(1, ncols, figsize=figsize)
 
-        for i in range(len(img)):
+        for i in range(ncols):
             axes[i].imshow(img[i].data, cmap=self.cmap)
             axes[i].set_title(img[i].title)
-
             axes[i].set_xticks(self.xticks(img[i]))
             axes[i].set_yticks(self.yticks(img[i]))
             axes[i].set_xticklabels(self.xticklabels(img[i]))
