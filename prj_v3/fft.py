@@ -8,14 +8,14 @@ from image import Image
 class FFT2D(Image):
     def __init__(self, img: Image):
         self.data = fft2d.fft2(img.data)
-        self.reset(img)
+        self.set_default(img)
         self.axis_off = False
 
 
 class FFT2DShift(Image):
     def __init__(self, img: Image):
         self.data = fft2d.fftshift(fft2d.fft2(img.data))
-        self.reset(img)
+        self.set_default(img)
         self.shifted = True
         self.axis_off = False
 
@@ -24,7 +24,7 @@ class InvFFT2D(Image):
     def __init__(self, amp: Image, ang: Image=None):
         data = amp.data if ang is None else amp.data * np.exp(1j * ang.data)
         self.data = fft2d.ifft2(data)
-        self.reset(amp)
+        self.set_default(amp)
         self.title = "Inverse FFT"
         self.dtype = "img"
         self.shifted = False
@@ -35,7 +35,7 @@ class InvFFT2DShift(Image):
     def __init__(self, amp: Image, ang: Image=None):
         data = amp.data if ang is None else amp.data * np.exp(1j * ang.data)
         self.data = fft2d.ifft2(fft2d.ifftshift(data))
-        self.reset(amp)
+        self.set_default(amp)
         self.title = "Inverse FFT"
         self.dtype = "img"
         self.shifted = False
@@ -46,14 +46,14 @@ class InvFFT2DShift(Image):
 class DCT2D(Image):
     def __init__(self, img: Image):
         self.data = fft2d.dct(fft2d.dct(img.data.T, type=2, norm='ortho').T, type=2, norm='ortho')
-        self.reset(img)
+        self.set_default(img)
         self.axis_off = False
 
 
 class InvDCT2D(Image):
     def __init__(self, img: Image):
         self.data = fft2d.idct(fft2d.idct(img.data.T, type=2, norm='ortho').T, type=2, norm='ortho')
-        self.reset(img)
+        self.set_default(img)
         self.title = "Inverse DCT"
         self.axis_off = False
 
@@ -62,7 +62,7 @@ class InvDCT2D(Image):
 class Amplitude(Image):
     def __init__(self, img: Image):
         self.data = np.abs(img.data)
-        self.reset(img)
+        self.set_default(img)
         self.title = "Amplitude(FFT)"
         self.dtype = "amp"
 
@@ -70,7 +70,7 @@ class Amplitude(Image):
 class Phase(Image):
     def __init__(self, img: Image):
         self.data = np.angle(img.data)
-        self.reset(img)
+        self.set_default(img)
         self.title = "Phase(FFT)"
         self.dtype = "ang"
 
@@ -79,25 +79,25 @@ class Phase(Image):
 class Abs(Image):
     def __init__(self, img: Image):
         self.data = np.abs(img.data)
-        self.reset(img)
+        self.set_default(img)
 
 
 class Log1p(Image):
     def __init__(self, img: Image):
         self.data = np.log1p(img.data)
-        self.reset(img)
+        self.set_default(img)
 
 
 class Log10(Image):
     def __init__(self, img: Image):
         self.data = np.log10(img.data)
-        self.reset(img)
+        self.set_default(img)
 
 
 class Real(Image):
     def __init__(self, img: Image):
         self.data = np.real(img.data)
-        self.reset(img)
+        self.set_default(img)
 
 
 if __name__ == "__main__":

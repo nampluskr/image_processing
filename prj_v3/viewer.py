@@ -9,9 +9,9 @@ class Viewer:
         self.yticks = Yticks()
         self.xticklabels = XtickLabels()
         self.yticklabels = YticksLabels()
-        self.reset()
+        self.set_default()
 
-    def reset(self):
+    def set_default(self):
         self.cmap = "gray"
         self.unit = 3
         return self

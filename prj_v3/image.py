@@ -9,10 +9,10 @@ import skimage
 class Image:
     def __init__(self, data: np.ndarray, title: str=""):
         self.data = data
-        self.reset()
+        self.set_default()
         self.title = title
 
-    def reset(self, img: Image=None):
+    def set_default(self, img: Image=None):
         if img is None:
             self.title = ""
             self.dtype = "img"
@@ -66,7 +66,7 @@ class Image:
 class Imread(Image):
     def __init__(self, path: str):
         self.data = skimage.io.imread(path)
-        self.reset()
+        self.set_default()
         self.title = os.path.basename(path)
 
 
@@ -77,32 +77,32 @@ class Gray(Image):
             if self.data.shape[-1] > 3:
                 self.data = skimage.color.rgba2rgb(self.data)
             self.data = skimage.color.rgb2gray(self.data)
-        self.reset(img)
+        self.set_default(img)
 
 
 class Resize(Image):
     def __init__(self, img: Image, shape: tuple):
         self.data = skimage.transform.resize(img.data, shape)
-        self.reset(img)
+        self.set_default(img)
 
 
 class Rescale(Image):
     def __init__(self, img: Image, min_max: tuple):
         img_min_max = img.data.min(), img.data.max()
         self.data = np.interp(img.data, img_min_max, min_max)
-        self.reset(img)
+        self.set_default(img)
 
 
 class Gaussian(Image):
     def __init__(self, img: Image, sigma=1):
         self.data = gaussian_filter(img.data, sigma=sigma)
-        self.reset(img)
+        self.set_default(img)
 
 
 class Uniform(Image):
     def __init__(self, img: Image, size=1):
         self.data = uniform_filter(img.data, size=size, mode="nearest")
-        self.reset(img)
+        self.set_default(img)
 
 
 if __name__ == "__main__":
@@ -121,7 +121,7 @@ if __name__ == "__main__":
         img2.set_dtype("amp").set_shifted(True)
         img3.set_dtype("ang").set_shifted(True)
 
-        viewer.reset()
+        viewer.set_default()
         viewer.show(img1, img2, img3)
 
     if 1:
