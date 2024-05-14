@@ -24,7 +24,7 @@ class Image:
             self.shifted = img.shifted
             self.axis_off = img.axis_off
         return self
-    
+
     @property
     def shape(self):
         return self.data.shape
@@ -41,6 +41,13 @@ class Image:
 
     def copy(self):
         img = Image(self.data, self.title)
+        img.dtype = self.dtype
+        img.shifted = self.shifted
+        img.axis_off = self.axis_off
+        return img
+    
+    def clip(self, min=1e-6):
+        img = Image(np.clip(self.data, min, self.data.max()), self.title)
         img.dtype = self.dtype
         img.shifted = self.shifted
         img.axis_off = self.axis_off
@@ -65,27 +72,32 @@ class Image:
     def set_axis_off(self, axis_off: bool):
         self.axis_off = axis_off
         return self
-    
+
     def __pow__(self, n):
         img = Image(self.data**n)
         img.set_default(self)
         return img
     
+    def __add__(self, img: Image):
+        img = Image(self.data + img.data)
+        img.set_default(self)
+        return img
+
     def __sub__(self, img: Image):
         img = Image(self.data - img.data)
         img.set_default(self)
         return img
-    
+
     def __mul__(self, img: Image):
         img = Image(self.data * img.data)
         img.set_default(self)
         return img
-    
+
     def __truediv__(self, img: Image):
         img = Image(self.data / img.data)
         img.set_default(self)
         return img
-    
+
     def __abs__(self):
         img = Image(np.abs(self.data))
         img.set_default(self)
@@ -93,10 +105,15 @@ class Image:
 
 
 class Imread(Image):
-    def __init__(self, path: str):
-        self.data = skimage.io.imread(path)
+    def __init__(self, filename: str, path: str=None):
+        if path is not None:
+            filename = os.path.join(path, filename)
+        if filename.endswith("csv"):
+            self.data = np.genfromtxt(filename, delimiter=',')
+        else:
+            self.data = skimage.io.imread(filename)
         self.set_default()
-        self.title = os.path.basename(path)
+        self.title = os.path.basename(filename)[:-4]
 
 
 class Gray(Image):
@@ -120,7 +137,11 @@ class Rescale(Image):
         img_min_max = img.data.min(), img.data.max()
         self.data = np.interp(img.data, img_min_max, min_max)
         self.set_default(img)
-
+        
+class Rotate(Image):
+    def __init__(self, img: Image, angle: int):
+        self.data = skimage.transform.rotate(img.data, angle, resize=True)
+        self.set_default(img)
 
 class Gaussian(Image):
     def __init__(self, img: Image, sigma=1):
@@ -141,7 +162,7 @@ if __name__ == "__main__":
 
     viewer = Viewer()
 
-    if 1:
+    if 0:
         img1 = Image(skimage.data.astronaut()).set_title("Astronaut").add_title("(raw)")
         img2 = Resize(img1.copy(), (400, 300)).add_title("(resized)")
         img3 = Gray(img2.copy()).add_title("(gray)")
@@ -153,9 +174,18 @@ if __name__ == "__main__":
         viewer.set_default()
         viewer.show(img1, img2, img3)
 
-    if 1:
+    if 0:
         raw = Image(skimage.data.astronaut()).set_title("RAW").info()
         img = Gray(raw.copy()).add_title("(gray)")
         img = Resize(img, (300, 200)).info().data_info()
 
         viewer.show(raw, img)
+        
+    if 1:
+        raw = Image(skimage.data.astronaut()).set_title("RAW").info()
+        img1 = Resize(Gray(raw.copy()), (300, 500)).add_title("(gray)")
+        img2 = Rotate(img1, 90).info().data_info()
+        img3 = Rotate(img1, 180).info().data_info()
+        img4 = Rotate(img1, 270).info().data_info()
+        
+        viewer.show(raw, img1, img2, img3)
