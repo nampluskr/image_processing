@@ -17,7 +17,10 @@ class Image:
         return self
     
     def add_title(self, title: str):
-        self.title += '_' + title
+        if self.title == "":
+            self.set_title(title)
+        else:
+            self.title += '_' + title
         return self
 
     @property
