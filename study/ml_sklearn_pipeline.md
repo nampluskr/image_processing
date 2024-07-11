@@ -1,3 +1,133 @@
+### [ml_clf_mlp_pipeline.ipynb] 단계별 적용 (21.09.15) 
+
+```python
+cancer = load_breast_cancer()
+X, y = cancer.data, cancer.target
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+
+scaler = MinMaxScaler().fit(X_train)
+X_train_scaled = scaler.transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+svm = SVC()
+svm.fit(X_train_scaled, y_train)
+svm.score(X_test_scaled, y_test)
+
+pipe = Pipeline([("scalar", MinMaxScaler()),
+                 ("svm", SVC())])
+pipe.fit(X_train, y_train)
+
+param_grid = {"svm__C": [0.01, 0.1, 1, 10],
+              "svm__gamma": [0.01, 0.1, 1, 10]}
+grid = GridSearchCV(pipe, param_grid=param_grid, cv=5,
+                    n_jobs=-1, verbose=True)
+grid.fit(X_train, y_train)
+
+print("Best params    : {}".format(grid.best_params_))
+print("Best CV score  : {:.4f}".format(grid.best_score_))
+print("Test set score : {:.4f}".format(grid.score(X_test, y_test)))
+```
+
+```python
+pipe2 = make_pipeline(MinMaxScaler(), SVC(C=100))
+pipe2.fit(X_train, y_train)
+
+param_grid = {"svc__C": [0.01, 0.1, 1, 10],
+              "svc__gamma": [0.01, 0.1, 1, 10]}
+grid2 = GridSearchCV(pipe2, param_grid=param_grid, cv=5,
+                    n_jobs=-1, verbose=True)
+grid2.fit(X_train, y_train)
+
+print("Best params    : {}".format(grid.best_params_))
+print("Best CV score  : {:.4f}".format(grid.best_score_))
+print("Test set score : {:.4f}".format(grid.score(X_test, y_test)))
+```
+
+```python
+pipe = Pipeline([("preprocessing", StandardScaler()),
+                 ("classifier", SVC())])
+
+param_grid = [{"preprocessing": [StandardScaler()],
+               "classifier": [SVC()],
+               "classifier__C": [0.01, 0.1, 1, 10],
+               "classifier__gamma": [0.01, 0.1, 1, 10]},
+              {"preprocessing": [None],
+               "classifier": [RandomForestClassifier(n_estimators=100)],
+               "classifier__max_features": [1, 2, 3]}]
+
+grid = GridSearchCV(pipe, param_grid=param_grid, cv=5,
+                    n_jobs=-1, verbose=10)
+grid.fit(X_train, y_train)
+
+print("Best params    : {}".format(grid.best_params_))
+print("Best CV score  : {:.4f}".format(grid.best_score_))
+print("Test set score : {:.4f}".format(grid.score(X_test, y_test)))
+```
+
+```python
+param_grid = [{"preprocessing": [None],
+               "classifier": [RandomForestClassifier(n_estimators=100)],
+               "classifier__max_features": [1, 2, 3]}]
+
+grid = GridSearchCV(pipe, param_grid=param_grid, cv=5,
+                    n_jobs=-1, verbose=10)
+grid.fit(X_train, y_train)
+
+print("Best params    : {}".format(grid.best_params_))
+print("Best CV score  : {:.4f}".format(grid.best_score_))
+print("Test set score : {:.4f}".format(grid.score(X_test, y_test)))
+```
+
+```python
+param_grid = [{"preprocessing": [StandardScaler()],
+               "classifier": [MLPClassifier(random_state=0)],
+               "classifier__solver": ["lbfgs", "adam"],
+               "classifier__hidden_layer_sizes": [(100), (10, 10), (100, 100)],
+               "classifier__activation": ["relu", "tanh"]
+               }]
+
+grid = GridSearchCV(pipe, param_grid=param_grid, cv=5,
+                    n_jobs=-1, verbose=10)
+grid.fit(X_train, y_train)
+
+print("Best params    : {}".format(grid.best_params_))
+print("Best CV score  : {:.4f}".format(grid.best_score_))
+print("Test set score : {:.4f}".format(grid.score(X_test, y_test)))
+```
+
+```pytohn
+pipe = Pipeline([("preprocess-1", MinMaxScaler()),
+                 ("preprocess-2", None),
+                 ("classifier", SVC())])
+
+param_grid = [{"preprocess-1": [MinMaxScaler()],
+               "preprocess-2": [None],
+               "classifier": [SVC()],
+               "classifier__C": [0.01, 0.1, 1, 10],
+               "classifier__gamma": [0.01, 0.1, 1, 10]},
+              {"preprocess-1": [None],
+               "preprocess-2": [None],
+               "classifier": [RandomForestClassifier(n_estimators=100)],
+               "classifier__max_features": [1, 2, 3]},
+              {"preprocess-1": [StandardScaler()],
+               "preprocess-2": [None],
+               "classifier": [MLPClassifier(random_state=0)],
+               "classifier__solver": ["lbfgs", "adam"],
+               "classifier__hidden_layer_sizes": [(100), (10, 10), (100, 100)],
+               "classifier__activation": ["relu", "tanh"]
+               }]
+
+grid = GridSearchCV(estimator=pipe,
+                    param_grid=param_grid,
+                    cv=5,
+                    n_jobs=-1, verbose=10)
+grid.fit(X_train, y_train)
+
+print("Best params    : {}".format(grid.best_params_))
+print("Best CV score  : {:.4f}".format(grid.best_score_))
+print("Test set score : {:.4f}".format(grid.score(X_test, y_test)))
+```
+
 ### Sklearn Pipeline
 
 - see: pjt_binary_clf_tuning.ipynb
