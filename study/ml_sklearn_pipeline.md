@@ -4,6 +4,110 @@
 - see: ml_cls-3_02_grid_cv.ipynb
 
 ```python
+import os
+import numpy as np
+import tensorflow as tf
+from tensorflow import keras
+
+# Data
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import MinMaxScaler, StandardScaler
+
+# Models
+from sklearn.svm import SVC
+from sklearn.neural_network import MLPClassifier
+from sklearn.ensemble import RandomForestClassifier
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Dense
+from tensorflow.keras.wrappers.scikit_learn import KerasClassifier
+
+# Tuning
+from sklearn.pipeline import Pipeline
+from sklearn.model_selection import GridSearchCV
+
+# import warnings; warnings.filterwarnings('ignore')
+
+# Print training and test accuracy
+def print_acc(model, data_train, data_test):
+    score_train = model.score(*data_train)
+    score_test = model.score(*data_test)
+
+#     print(model)
+    print("\n>>> Train Acc.: {:.4f}, Test Acc.: {:.4f}".format(
+        score_train, score_test))
+    
+# Print tuning results
+def print_best(cv, data_test):
+    print("Best params    : {}".format(cv.best_params_))
+    print("Best CV score  : {:.4f}".format(cv.best_score_))
+    print("Test set score : {:.4f}".format(cv.score(*data_test)))
+
+def print_result(cv_result):
+    means = cv_result.cv_results_["mean_test_score"]
+    params = cv_result.cv_results_["params"]
+
+    for mean, param in zip(means, params):
+        print("{:.4f} with: {}".format(mean, param))
+```
+
+```python
+# Data
+cancer = load_breast_cancer()
+X, y = cancer.data, cancer.target
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=1)
+
+X_train.shape, X_test.shape
+
+# Data
+url = "https://raw.githubusercontent.com/nampluskr/datasets/master/pima-indians-diabetes.csv"
+pima = np.loadtxt(url, delimiter=',')
+X, y = pima[:, :-1], pima[:, -1]
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=1)
+
+X_train.shape, X_test.shape
+```
+
+```python
+pipe = Pipeline([("pre", MinMaxScaler()),
+                 ("clf", SVC())])
+
+param_svc = dict(pre=[MinMaxScaler()],
+                 clf=[SVC()],
+                 clf__C=[0.01, 0.1, 1, 10],
+                 clf__gamma=[0.01, 0.1, 1, 10])
+
+param_rfc = dict(pre=[None],
+                 clf=[RandomForestClassifier()],
+                 clf__n_estimators=[100],
+                 clf__max_features=[1, 2, 3])
+
+param_mlp = dict(pre=[StandardScaler()],
+                 clf=[MLPClassifier(max_iter=10000, random_state=0)],
+                 clf__solver=["lbfgs", "adam"],
+                 clf__hidden_layer_sizes=[(10, 10), (100, 100)],
+                 clf__activation=["relu", "tanh"])
+
+grid = GridSearchCV(estimator=pipe,
+                    param_grid=[param_svc, param_rfc, param_mlp],
+                    cv=10, n_jobs=-1, verbose=5)
+
+grid_result = grid.fit(X_train, y_train)
+
+print_acc(grid, (X_train, y_train), (X_test, y_test))
+```
+
+```python
+grid.get_params().keys()
+print_best(grid, (X_test, y_test))
+print_result(grid_result)
+```
+
+### zrv
+
+```python
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
