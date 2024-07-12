@@ -196,25 +196,25 @@ models["svc"] = {
     "steps": Pipeline([("pre", None),
                        ("clf", SVC())]),
     "params": {"pre": [MinMaxScaler(), StandardScaler()],
-                   "clf__C": [0.1, 1, 10],
-                   "clf__gamma": [0.1, 1, 10],}
+               "clf__C": [0.1, 1, 10],
+               "clf__gamma": [0.1, 1, 10],}
 }
 models["rfc"] = {
     "name": "Random Forest",
     "steps": Pipeline([("pre", None),
                        ("clf", RandomForestClassifier())]),
     "params": {"pre": [None],
-                   "clf__n_estimators": [100],
-                   "clf__max_features": [1, 2, 3],}
+               "clf__n_estimators": [100],
+               "clf__max_features": [1, 2, 3],}
 }
 models["mlp"] = {
     "name": "Multilayer Perception",
     "steps": Pipeline([("pre", None), 
                        ("clf", MLPClassifier(max_iter=10000, random_state=42))]),
     "params": {"pre": [StandardScaler()],
-                   "clf__solver": ["lbfgs", "adam"],
-                   "clf__hidden_layer_sizes": [(10, 10), (100, 100)],
-                   "clf__activation": ["relu", "tanh"],}
+               "clf__solver": ["lbfgs", "adam"],
+               "clf__hidden_layer_sizes": [(10, 10), (100, 100)],
+               "clf__activation": ["relu", "tanh"],}
 }
 ```
 
