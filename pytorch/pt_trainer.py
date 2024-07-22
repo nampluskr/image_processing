@@ -2,7 +2,7 @@ import numpy as np
 import torch
 
 import sys
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 
 class Trainer:
