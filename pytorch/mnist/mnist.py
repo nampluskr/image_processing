@@ -74,8 +74,10 @@ if __name__ == "__main__":
     use_cuda = torch.cuda.is_available()
     device = torch.device("cuda" if use_cuda else "cpu")
     
-    data_dir = "/home/namu/myspace/NAMU_Tutorial/MNIST/Pytorch/MNIST/raw"
+    # data_dir = "/home/namu/myspace/NAMU_Tutorial/MNIST/Pytorch/MNIST/raw"
     # data_dir = "/home/namu/myspace/data/fashion_mnist"
+    # data_dir = "/mnt/d/datasets/fashion_mnist_29M"
+    data_dir = "/mnt/d/datasets/mnist_11M"
 
     mnist = MNIST(data_dir)
     train_images, train_labels = mnist.get_train_data()
