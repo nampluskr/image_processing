@@ -2,23 +2,39 @@ import numpy as np
 import torch
 
 import sys
-from tqdm import tqdm
+from tqdm.auto import tqdm
+
+
+class EarlyStopper:
+    def __init__(self, patience=3, min_delta=1e-3):
+        self.patience = patience
+        self.min_delta = min_delta
+        self.best_loss = float("inf")
+        self.counter = 0
+
+    def step(self, loss):
+        self.counter += 1
+        if loss < self.best_loss - self.min_delta:
+            self.best_loss = loss
+            self.counter = 0
+        elif  self.patience <= self.counter:
+            return True
+        return False
 
 
 class Trainer:
-    def __init__(self, model, optimizer, loss_fn, metrics={}, scheduler=None):
+    def __init__(self, model, optimizer, loss_fn, metrics={}):
         self.model = model
         self.optimizer = optimizer
         self.loss_fn = loss_fn
         self.metrics = {"loss": loss_fn}
         self.metrics.update(metrics)
-        self.scheduler = scheduler
 
-        self.options = dict(leave=False, file=sys.stdout, ascii=True) # ncols=100
+        self.kwargs = dict(leave=False, file=sys.stdout, unit=" batch",
+                           ascii=True, ncols=100)
         self.device = next(model.parameters()).device
 
     def train_step(self, x, y):
-        # self.model.train()
         x, y = x.to(self.device), y.to(self.device)
         self.optimizer.zero_grad()
         pred = self.model(x)
@@ -34,7 +50,6 @@ class Trainer:
 
     @torch.no_grad()
     def test_step(self, x, y):
-        # self.model.eval()
         x, y = x.to(self.device), y.to(self.device)
         pred = self.model(x)
         res = {metric: metric_fn(pred, y).item() 
@@ -45,7 +60,8 @@ class Trainer:
         for metric, value in res.items():
             self.history[metric].append(value.mean())
 
-    def fit(self, train_loader, n_epochs, valid_loader=None):
+    def fit(self, train_loader, n_epochs, valid_loader=None,
+            lr_scheduler=None, early_stopper=None):
         self.history = {metric: [] for metric in self.metrics}
         if valid_loader is not None:
             self.history.update({f"val_{metric}": [] for metric in self.metrics})
@@ -57,7 +73,7 @@ class Trainer:
             ## Training
             self.model.train()
             res = {metric: np.array([]) for metric in self.metrics}
-            with tqdm(train_loader, **self.options) as pbar:
+            with tqdm(train_loader, **self.kwargs) as pbar:
                 for x, y in pbar:
                     step_res = self.train_step(x, y)
                     for metric in step_res:
@@ -66,18 +82,18 @@ class Trainer:
                     train_desc = ', '.join([f"{m}={v.mean():.3f}" for m, v in res.items()])
                     pbar.set_description(">> " + epoch + train_desc)
 
-            if self.scheduler is not None:
-                self.scheduler.step()
+            if lr_scheduler is not None:
+                lr_scheduler.step()
 
-            ## Validation
-            self.model.eval()
             if valid_loader is None:
                 print(">> " + epoch + train_desc)
                 self.update_history(res)
                 continue
 
+            ## Validation
+            self.model.eval()
             val_res = {f"val_{metric}": np.array([]) for metric in self.metrics}
-            with tqdm(valid_loader, **self.options) as pbar:
+            with tqdm(valid_loader, **self.kwargs) as pbar:
                 for x, y in pbar:
                     step_res = self.test_step(x, y)
                     for metric in step_res:
@@ -90,12 +106,19 @@ class Trainer:
             self.update_history(res)
             self.update_history(val_res)
 
+            ## Early Stopping
+            if early_stopper is not None:
+                val_loss = val_res["val_loss"].mean()
+                if early_stopper.step(val_loss):
+                    print(">> Early stopped!\n") # log
+                    break
+
         return self.history
 
     def evaluate(self, test_loader):
         self.model.eval()
         test_res = {metric: np.array([]) for metric in self.metrics}
-        with tqdm(test_loader, **self.options) as pbar:
+        with tqdm(test_loader, **self.kwargs) as pbar:
             for x, y in pbar:
                 step_res = self.test_step(x, y)
                 for metric in test_res:
