@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from trainer import Trainer
+from trainer import Trainer, EarlyStopper
 from mnist import MNIST, get_dataloader
 
 
@@ -103,9 +103,10 @@ if __name__ == "__main__":
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, 
                                                 step_size=3, gamma=0.1)
     
-    clf = Trainer(model, optimizer, loss_fn, metrics={"acc": accuracy},
-                      scheduler=scheduler)
-    hist = clf.fit(train_loader, n_epochs=10, valid_loader=test_loader)
+    clf = Trainer(model, optimizer, loss_fn, metrics={"acc": accuracy})
+    hist = clf.fit(train_loader, n_epochs=20, valid_loader=test_loader,
+                   lr_scheduler=scheduler,
+                   early_stopper=EarlyStopper(patience=3, min_delta=0.001))
     
     res = clf.evaluate(test_loader)
     print(f">> Evaluation: loss={res['loss']:.3f}, acc={res['acc']:.3f}")

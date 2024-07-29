@@ -5,8 +5,8 @@ import gzip
 
 import torch
 from torch.utils.data import Dataset, DataLoader
-from torchvision import tv_tensors
-from torchvision.transforms import v2
+# from torchvision import tv_tensors
+# from torchvision.transforms import v2
 
 
 class MNIST:
