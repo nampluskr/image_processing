@@ -176,3 +176,110 @@ total_loss = 0.8 * perceptual_loss + 0.2 * reconstruction_loss
 ```
 
 Perceptual Loss는 이미지의 고차원적인 특징을 고려하여 더 자연스럽고 실제적인 이미지 생성에 도움을 줄 수 있습니다.
+
+
+## 입력 이미지의 크기가 512, 512 로 주어지기 때문에 conv2d 레이어를 충분히 늘려야 됩니다. 높은 이미지 해상도를 가진 이미지를 생성할 수 있는 enncoder와 decoder 를 작성해 주세요 
+
+```python
+import torch
+import torch.nn as nn
+
+class Encoder(nn.Module):
+    def __init__(self):
+        super(Encoder, self).__init__()
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=5, stride=2, padding=2) # Increased filters & stride
+        self.relu1 = nn.ReLU()
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=5, stride=2, padding=2)
+        self.relu2 = nn.ReLU()
+        self.conv3 = nn.Conv2d(64, 128, kernel_size=5, stride=2, padding=2) # Added conv layer
+        self.relu3 = nn.ReLU()
+
+    def forward(self, x):
+        x = self.conv1(x)
+        x = self.relu1(x)
+        x = self.conv2(x)
+        x = self.relu2(x)
+        x = self.conv3(x)  # Added conv layer
+        x = self.relu3(x) 
+        return x
+
+class Decoder(nn.Module):
+    def __init__(self):
+        super(Decoder, self).__init__()
+        self.deconv1 = nn.ConvTranspose2d(128, 64, kernel_size=5, stride=2, padding=2, output_padding=1)
+        self.relu1 = nn.ReLU()
+        self.deconv2 = nn.ConvTranspose2d(64, 32, kernel_size=5, stride=2, padding=2, output_padding=1)
+        self.relu2 = nn.ReLU()
+        self.deconv3 = nn.ConvTranspose2d(32, 3, kernel_size=5, stride=2, padding=2, output_padding=1) # Added deconv layer
+
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.deconv1(x)
+        x = self.relu1(x)
+        x = self.deconv2(x)
+        x = self.relu2(x)
+        x = self.deconv3(x) # Added deconv layer
+        x = self.sigmoid(x) 
+        return x
+
+# Instantiate Encoder, Decoder, and Autoencoder
+encoder = Encoder()
+decoder = Decoder()
+autoencoder = Autoencoder(encoder, decoder)
+
+```
+
+## encoder 부분을 pytorch에서 제공하는 pretrained Resnet 으로 사용하고 싶습니다. encoder 와 decoder 를 다시 작성해 주세요.
+
+```python
+import torch
+import torch.nn as nn
+from torchvision.models import resnet18
+
+class Encoder(nn.Module):
+    def __init__(self):
+        super(Encoder, self).__init__()
+        self.resnet = resnet18(pretrained=True)  # Load pretrained ResNet18
+
+        # Remove the fully connected layer (fc) from ResNet
+        self.resnet = nn.Sequential(*list(self.resnet.children())[:-1])
+
+    def forward(self, x):
+        x = self.resnet(x)
+        return x
+
+class Decoder(nn.Module):
+    def __init__(self):
+        super(Decoder, self).__init__()
+        # Adapt the input channels to ResNet's output channels (512 for resnet18)
+        in_channels = 512  
+
+        self.deconv1 = nn.ConvTranspose2d(in_channels, 256, kernel_size=4, stride=2, padding=1) 
+        self.relu1 = nn.ReLU()
+        self.deconv2 = nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2, padding=1)
+        self.relu2 = nn.ReLU()
+        self.deconv3 = nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1)
+        self.relu3 = nn.ReLU()
+        self.deconv4 = nn.ConvTranspose2d(64, 3, kernel_size=4, stride=2, padding=1)
+        self.sigmoid = nn.Sigmoid()
+
+    def forward(self, x):
+        x = self.deconv1(x)
+        x = self.relu1(x)
+        x = self.deconv2(x)
+        x = self.relu2(x) 
+        x = self.deconv3(x)
+        x = self.relu3(x) 
+
+        x = self.deconv4(x)
+        x = self.sigmoid(x)
+        return x
+
+
+# Instantiate Encoder, Decoder, and Autoencoder
+encoder = Encoder()
+decoder = Decoder()
+autoencoder = Autoencoder(encoder, decoder).cuda() # Move to GPU if available
+
+```
