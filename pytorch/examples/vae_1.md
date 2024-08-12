@@ -1,3 +1,23 @@
+## Example Image Generation (for visualization)
+
+```python
+# Assuming 'vae' is your trained VAE model and has the encoder and decoder defined 
+
+def generate_image(latent_vector):  
+    with torch.no_grad():  
+        reconstructed_image = decoder(latent_vector)  
+        return reconstructed_image.cpu() # Return as a numpy array or process further for display
+
+# Example Usage to display generated images
+sample_vectors = torch.randn(5, latent_dim).to(device)  
+generated_images = [generate_image(vec) for vec in sample_vectors]
+
+for i, img in enumerate(generated_images): 
+    img = img.permute(1, 2, 0).numpy()  # Convert to (H, W, C) and numpy array
+    plt.imshow(img)
+    plt.show() 
+```
+
 ## CIFAR-10 Image Generation Autoencoder with PyTorch
 
 ```python
