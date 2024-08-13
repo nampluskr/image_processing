@@ -4,14 +4,14 @@
 class ConvBlock(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()
-        self.conv = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1)
-        self.relu = nn.LeakyReLU()
-        self.pool = nn.MaxPool2d(kernel_size=2, stride=2)
+        self.conv_block = nn.Sequential(
+            nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1),
+            nn.LeakyReLU(),
+            nn.MaxPool2d(kernel_size=2, stride=2)
+        )
     
     def forward(self, x):
-        x = self.conv(x)
-        x = self.relu(x)
-        x = self.pool(x)
+        x = self.conv_block(x)
         return x
 
 class Encoder(nn.Module):
