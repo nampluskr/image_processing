@@ -1,3 +1,76 @@
+## 출력 이미지 해상도 (1024, 1024) 를 위한 고해상도 decoder 코드
+
+```python
+class Decoder(nn.Module):
+    def __init__(self, latent_dim=64, image_size=(1024, 1024)):
+        super().__init__()
+        self.fc1 = nn.Linear(latent_dim, 512 * 8 * 8) # Upsampling to a high dimension
+        
+        # Upsampling and decoding convolutional layers 
+        self.conv1 = nn.ConvTranspose2d(512, 256, kernel_size=4, stride=2, padding=1)  
+        self.conv2 = nn.ConvTranspose2d(256, 128, kernel_size=4, stride=2, padding=1) # Decoding
+        self.conv3 = nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1)  #Decoding
+        self.conv4 = nn.ConvTranspose2d(64, 3, kernel_size=4, stride=2, padding=1, output_padding=1) #Outputting image channels
+
+    def forward(self, z):
+        x = torch.relu(self.fc1(z))
+        x = x.view(-1, 512, 8, 8)  # Reshape to match ConvTranspose input
+        
+        x = torch.relu(self.conv1(x))
+        x = torch.relu(self.conv2(x))
+        x = torch.relu(self.conv3(x))
+        x = torch.sigmoid(self.conv4(x))  # Outputting between 0 and 1 for pixel values
+        return x 
+```
+
+## 고해상도 encoder / decoder
+
+```python
+class Encoder(nn.Module):
+    def __init__(self, latent_dim=64):
+        super().__init__()
+        self.conv1 = nn.Conv2d(3, 64, kernel_size=4, stride=2, padding=1)
+        self.batchnorm1 = nn.BatchNorm2d(64)
+        self.relu1 = nn.ReLU()
+
+        self.conv2 = nn.Conv2d(64, 128, kernel_size=4, stride=2, padding=1)
+        self.batchnorm2 = nn.BatchNorm2d(128)
+        self.relu2 = nn.ReLU()
+
+        self.fc1 = nn.Linear(128 * 8 * 8, latent_dim)  # Assuming output size of conv layers is (8x8) after all pooling
+
+    def forward(self, x):
+        x = self.batchnorm1(self.conv1(x))
+        x = self.relu1(x)
+        x = self.batchnorm2(self.conv2(x))
+        x = self.relu2(x)
+        x = x.view(-1, 128 * 8 * 8)  # Flatten for fully connected layer
+        x = self.fc1(x)
+
+        return x
+
+
+class Decoder(nn.Module):
+    def __init__(self, latent_dim=64, image_size=(1024, 1024)):
+        super().__init__()
+        self.fc1 = nn.Linear(latent_dim, 128 * 8 * 8)  # Output size should match input of first convTranspose
+        self.conv1 = nn.ConvTranspose2d(128, 64, kernel_size=4, stride=2, padding=1)  # Deconv Layer
+        self.batchnorm1 = nn.BatchNorm2d(64) # Applied BatchNorm 
+        self.relu1 = nn.ReLU()
+
+        self.conv2 = nn.ConvTranspose2d(64, 3, kernel_size=4, stride=2, padding=1)  # Output channels are 3 for RGB
+        self.sigmoid = nn.Sigmoid()  # Apply sigmoid to output pixel values (0-1 range)
+
+    def forward(self, z):
+        x = self.fc1(z)
+        x = x.view(-1, 128, 8, 8) 
+        x = self.batchnorm1(self.conv1(x))  # Apply BatchNorm after conv1
+        x = self.relu1(x)
+        x = self.sigmoid(self.conv2(x))
+
+        return x
+```
+
 ## Encoder for VAE
 
 ```python
