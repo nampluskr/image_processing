@@ -75,7 +75,7 @@ class Decoder(nn.Module):
         x = self.conv4(x)
         x = torch.sigmoid(x) # Output pixel values between 0 and 1
         return x
-
+AC
 
 class Autoencoder(nn.Module):
     def __init__(self, encoder, decoder):
@@ -148,17 +148,17 @@ if __name__ == "__main__":
     transform_train = transforms.Compose([
         transforms.ToPILImage(),
         transforms.RandomHorizontalFlip(0.3),
-        transforms.RandomVerticalFlip(0.2),
+        transforms.RandomVerticalFlip(0.3),
         transforms.ToTensor(),
-        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
+        # transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
     ])
 
     transform_test = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.RandomHorizontalFlip(0.3),
-        transforms.RandomVerticalFlip(0.2),
+        # transforms.ToPILImage(),
+        # transforms.RandomHorizontalFlip(0.3),
+        # transforms.RandomVerticalFlip(0.3),
         transforms.ToTensor(),
-        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
+        # transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
     ])
 
     def target_transform(label):
@@ -174,10 +174,10 @@ if __name__ == "__main__":
 
     g = torch.Generator()
     g.manual_seed(0)
-    batch_size = 64
+    batch_size = 32
 
     kwargs = {"worker_init_fn": seed_worker, "generator": g,
-                "num_workers": 4, "pin_memory": True } if use_cuda else {}
+              "num_workers": 8, "pin_memory": True } if use_cuda else {}
     train_loader = DataLoader(train_dataset, 
                                 batch_size=batch_size, shuffle=True, **kwargs)
 
@@ -191,14 +191,17 @@ if __name__ == "__main__":
     encoder = Encoder().to(device)
     decoder = Decoder().to(device)
     model = Autoencoder(encoder, decoder).to(device)
-    # loss_fn = nn.MSELoss()
-    loss_fn = nn.BCELoss()
-    optimizer = optim.Adam(model.parameters(), lr=0.001)
-    metrics = {"acc": binary_accuracy}
-    early_stopper = EarlyStopping(patience=3, min_delta=0.001)
+    loss_fn = nn.MSELoss()
+    # loss_fn = nn.BCELoss()
+    optimizer = optim.Adam(model.parameters(), lr=0.0001)
+    metrics = {"bce": nn.BCELoss(), 
+               "L1": nn.L1Loss(),
+               "acc": binary_accuracy}
+
+    early_stopper = EarlyStopping(patience=3, min_delta=0.0001)
 
     ae = TrainerAE(model, optimizer, loss_fn, metrics)
-    hist = ae.fit(train_loader, n_epochs=10, valid_loader=test_loader,
+    hist = ae.fit(train_loader, n_epochs=50, valid_loader=test_loader,
                 early_stopper=early_stopper)
 
     res = ae.evaluate(test_loader)
