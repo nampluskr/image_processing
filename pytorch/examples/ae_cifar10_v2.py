@@ -73,7 +73,7 @@ class Decoder(nn.Module):
         x = self.conv1(x)
         x = self.relu1(x)
         x = self.conv2(x)
-        # x = torch.sigmoid(x)
+        x = torch.sigmoid(x)
         return x
 
 
@@ -148,17 +148,14 @@ if __name__ == "__main__":
     transform_train = transforms.Compose([
         transforms.ToPILImage(),
         transforms.RandomHorizontalFlip(0.3),
-        transforms.RandomVerticalFlip(0.2),
+        transforms.RandomVerticalFlip(0.3),
         transforms.ToTensor(),
-        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
+        # transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
     ])
 
     transform_test = transforms.Compose([
-        transforms.ToPILImage(),
-        transforms.RandomHorizontalFlip(0.3),
-        transforms.RandomVerticalFlip(0.3),
         transforms.ToTensor(),
-        transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
+        # transforms.Normalize([0.5, 0.5, 0.5], [0.5, 0.5, 0.5]),
     ])
 
     def target_transform(label):
@@ -174,10 +171,10 @@ if __name__ == "__main__":
 
     g = torch.Generator()
     g.manual_seed(0)
-    batch_size = 64
+    batch_size = 32
 
     kwargs = {"worker_init_fn": seed_worker, "generator": g,
-                "num_workers": 4, "pin_memory": True } if use_cuda else {}
+              "num_workers": 8, "pin_memory": True } if use_cuda else {}
     train_loader = DataLoader(train_dataset,
                               batch_size=batch_size, shuffle=True, **kwargs)
 
@@ -188,17 +185,18 @@ if __name__ == "__main__":
     # Modeling / Training
     # ===============================================================
 
-    latent_dim = 128
+    latent_dim = 64
     encoder = Encoder(latent_dim=latent_dim)
     decoder = Decoder(latent_dim=latent_dim)
     model = Autoencoder(encoder, decoder).to(device)
-    loss_fn = nn.MSELoss()
-    # loss_fn = nn.BCELoss()
-    # loss_fn = nn.L1Loss()
-    optimizer = optim.Adam(model.parameters(), lr=0.0001)
-    metrics = {"acc": binary_accuracy}
-    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.5)
-    early_stopper = EarlyStopping(patience=5, min_delta=0.001)
+    optimizer = optim.Adam(model.parameters(), lr=0.001)
+
+    loss_fn = nn.BCELoss()
+    metrics = {"mse": nn.MSELoss(), 
+               "L1": nn.L1Loss(),
+               "acc": binary_accuracy}
+    scheduler = optim.lr_scheduler.StepLR(optimizer, step_size=5, gamma=0.9)
+    early_stopper = EarlyStopping(patience=3, min_delta=0.0001)
 
     ae = TrainerAE(model, optimizer, loss_fn, metrics)
     hist = ae.fit(train_loader, n_epochs=50, valid_loader=test_loader,
