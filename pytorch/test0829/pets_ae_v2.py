@@ -241,6 +241,18 @@ hist = ae.fit(train_loader, n_epochs=10, valid_loader=test_loader)
 res = ae.evaluate(test_loader)
 print(f">> Evaluation: loss={res['loss']:.3f}, acc={res['acc']:.3f}")
 
+# >> Epoch[ 1/10] loss=0.611, acc=0.877, ssim=0.478 | val_loss=0.597, val_acc=0.883, val_ssim=0.539   
+# >> Epoch[ 2/10] loss=0.596, acc=0.892, ssim=0.553 | val_loss=0.588, val_acc=0.902, val_ssim=0.572   
+# >> Epoch[ 3/10] loss=0.591, acc=0.895, ssim=0.582 | val_loss=0.580, val_acc=0.914, val_ssim=0.598   
+# >> Epoch[ 4/10] loss=0.586, acc=0.898, ssim=0.601 | val_loss=0.578, val_acc=0.914, val_ssim=0.613   
+# >> Epoch[ 5/10] loss=0.582, acc=0.902, ssim=0.615 | val_loss=0.575, val_acc=0.906, val_ssim=0.626   
+# >> Epoch[ 6/10] loss=0.579, acc=0.904, ssim=0.626 | val_loss=0.568, val_acc=0.904, val_ssim=0.636   
+# >> Epoch[ 7/10] loss=0.576, acc=0.906, ssim=0.636 | val_loss=0.568, val_acc=0.919, val_ssim=0.644   
+# >> Epoch[ 8/10] loss=0.573, acc=0.907, ssim=0.645 | val_loss=0.566, val_acc=0.936, val_ssim=0.648   
+# >> Epoch[ 9/10] loss=0.570, acc=0.911, ssim=0.654 | val_loss=0.564, val_acc=0.925, val_ssim=0.661   
+# >> Epoch[10/10] loss=0.567, acc=0.912, ssim=0.662 | val_loss=0.558, val_acc=0.926, val_ssim=0.670   
+# >> Evaluation: loss=0.558, acc=0.926   
+
 def show_images(images, labels=None, n_images=5, unit=2):
     fig, axes = plt.subplots(ncols=n_images, figsize=(n_images*unit, unit))
     for i in range(n_images):
