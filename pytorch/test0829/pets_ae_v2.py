@@ -135,7 +135,7 @@ class ConvBlock(nn.Module):
         self.block = nn.Sequential(
             nn.Conv2d(in_channels, out_channels, kernel_size=3, stride=1, padding=1),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(),)
+            nn.LeakyReLU(0.2, inplace = True),)
 
     def forward(self, x):
         return self.block(x)
@@ -183,7 +183,7 @@ class UpConvBlock(nn.Module):
         self.block = nn.Sequential(
             nn.ConvTranspose2d(in_channels, out_channels, kernel_size=4, stride=2, padding=1),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU(),)
+            nn.LeakyReLU(0.2, inplace = True),)
 
     def forward(self, x):
         return self.block(x)
