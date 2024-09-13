@@ -1,0 +1,16 @@
+> test_0905     : [x] patience=3, n_epochs=50 => patience=10, n_epochs=100
+
+> test_0906     : [O] convnet_latent-64, 128, 256, 512, 1024, 2048
+> test_0907     : [O] vgg16, vgg19 / resnet34, resnet50 / efficientb0, b1, b2, b3, b7
+
+> test_0909     : [O] gen_mura_ / summary_hist_ (convnet / pretrained)
+
+> test_0910     : [O] unet_latent-64, 128, 256, 512, 1024, 2048
+> test_0910_2   : [O] eval_unet-xxx / automl_unet-xxx
+
+> test_0911_1   : [O] make_dot_lines, test_histogram
+> test_0911_2   : [O] eval_convnet-xxx / automl_convnet-xxx
+> test_0911_3   : [O] train_clf_model / eval_clf_model (vgg16, 19 / resnet34, 50 / efficientb0, b1, b2, b3, b7)
+> test_0911_4   : [O] eval_model-xxx / automl_model-xxx (vgg16, 19 / resnet34, 50 / efficientb0, b1, b2, b3, b7)
+
+> test_0913     : [O] summary_training_history / summary_training_values / threshold_hist_xxx (convnet, pretrained, unet)
